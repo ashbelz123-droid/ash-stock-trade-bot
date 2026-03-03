@@ -4,22 +4,21 @@ import axios from "axios";
 import dotenv from "dotenv";
 
 dotenv.config();
-
 process.env.NTBA_FIX_350 = "1";
 
 /*
-==================================================
-ASH BRAND FUTURE COMMUNITY SIGNAL BOT
-==================================================
+====================================
+ASH BRAND FUTURE COMMUNITY BOT
+====================================
 Markets:
 EURUSD, GBPUSD, USDJPY, BTCUSD
 
 Mode:
-Adaptive fair community signals
+Adaptive fair signal assistant
 
 Hosting:
 Render Free Tier Friendly
-==================================================
+====================================
 */
 
 const app = express();
@@ -28,9 +27,14 @@ app.use(express.json());
 const PORT = process.env.PORT || 10000;
 
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
+
 const CHANNEL = "@pipstockbot";
 
-/* Memory Engine */
+/*
+====================================
+Memory Engine
+====================================
+*/
 
 let marketMemory = [];
 const MEMORY_LIMIT = 20;
@@ -49,7 +53,11 @@ function memoryTrendBias(){
            marketMemory.length;
 }
 
-/* Smart Market Filter */
+/*
+====================================
+Smart Market Filter
+====================================
+*/
 
 function smartMarketScore(prices){
 
@@ -75,13 +83,47 @@ function smartMarketScore(prices){
     return trendScore;
 }
 
-/* Health Route */
+/*
+====================================
+Start Message
+====================================
+*/
 
-app.get("/", (req,res)=>{
-    res.send("🔥 Ash Brand Future Bot Running");
+bot.onText(/\/start/, async(msg)=>{
+
+    const text = `
+👋 Welcome to Ash Brand Community
+
+🔥 Founder: Ash
+📊 Ash Stock Trade Signal System
+
+⚠ Trading Caution:
+• Use 1–2% risk per trade.
+• Signals are research guidance only.
+• Market movement is uncertain.
+
+💡 How To Trade Signals:
+
+1. Wait for signal inside channel.
+2. Check Entry price.
+3. Set Stop Loss (SL).
+4. Take TP1 or TP2 if possible.
+5. Trade patiently.
+
+Channel Signal Hub:
+👉 https://t.me/pipstockbot
+
+Stay disciplined.
+`;
+
+    await bot.sendMessage(msg.chat.id,text);
 });
 
-/* Webhook */
+/*
+====================================
+Webhook Setup
+====================================
+*/
 
 app.post(`/bot${process.env.TELEGRAM_BOT_TOKEN}`, (req,res)=>{
     bot.processUpdate(req.body);
@@ -94,35 +136,24 @@ if(process.env.RENDER_EXTERNAL_URL){
     );
 }
 
-/* Anti Sleep Heartbeat */
+/*
+====================================
+Anti Sleep Heartbeat
+====================================
+*/
 
-setInterval(async ()=>{
+setInterval(async()=>{
     try{
         if(!process.env.RENDER_EXTERNAL_URL) return;
         await axios.get(process.env.RENDER_EXTERNAL_URL);
     }catch{}
-}, 5 * 60 * 1000);
+},5*60*1000);
 
-/* Start Command */
-
-bot.onText(/\/start/, async(msg)=>{
-
-    const text = `
-🔥 ASH BRAND FUTURE BOT
-
-Community Signal System
-
-✅ Fair Adaptive Signals
-✅ Memory Pattern Filtering
-✅ 2–6 Signals Daily Target
-
-Signals appear inside channel.
-`;
-
-    await bot.sendMessage(msg.chat.id,text);
-});
-
-/* Signal Engine */
+/*
+====================================
+Signal Engine
+====================================
+*/
 
 async function signalEngine(){
 
@@ -157,10 +188,7 @@ async function signalEngine(){
 
             let score = smartMarketScore(prices);
 
-            const memoryBias =
-                memoryMemoryBias();
-
-            score = score + memoryBias;
+            score += memoryTrendBias();
 
             updateMarketMemory(score);
 
@@ -204,11 +232,19 @@ Risk 1–2%
     }catch{}
 }
 
-/* Run Every 1 Hour */
+/*
+====================================
+Run Every 1 Hour
+====================================
+*/
 
 setInterval(signalEngine,60*60*1000);
 
-/* Server Start */
+/*
+====================================
+Server Start
+====================================
+*/
 
 app.listen(PORT,()=>{
     console.log("🔥 Ash Brand Future Bot Running");
