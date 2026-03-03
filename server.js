@@ -8,12 +8,8 @@ dotenv.config();
 process.env.NTBA_FIX_350 = "1";
 
 /* ============================
-ASH ELITE INSTITUTIONAL ENGINE
+ASH ELITE BOT SERVER
 Owner: Ashbelz
-
-Forex Daily Limit: 0-3
-Crypto Daily Limit: 0-2
-Mode: Hedge Research Style
 ============================ */
 
 const app = express();
@@ -21,12 +17,24 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 10000;
 
+/* ============================
+BOT CONFIG
+============================ */
+
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
 
 const CHANNEL = "@pipstockbot";
 
 /* ============================
-ENGINE LOCK
+ROOT ROUTE (Fix Cannot GET /)
+============================ */
+
+app.get("/", (req,res)=>{
+    res.send("🔥 Ash Elite Bot Running");
+});
+
+/* ============================
+ENGINE VARIABLES
 ============================ */
 
 let engineRunning = false;
@@ -79,7 +87,7 @@ function calculateRSI(prices, period = 14){
 }
 
 /* ============================
-GLASS STYLE MESSAGE
+GLASS MESSAGE STYLE
 ============================ */
 
 function glassMessage(title, body){
@@ -91,7 +99,7 @@ function glassMessage(title, body){
 ${body}
 
 ⚠ Research Signal Only
-Elite Hedge Engine
+Ash Elite Engine
 ━━━━━━━━━━━━━━━━━━━
 `;
 }
@@ -107,9 +115,9 @@ bot.onText(/\/start/, async(msg)=>{
 
 Owner: Ashbelz
 
-Signals Per Day:
-Forex → 0-3
-Crypto → 0-2
+Signals:
+Forex → 0-3/day
+Crypto → 0-2/day
 
 Channel:
 👉 https://t.me/pipstockbot
@@ -174,8 +182,6 @@ async function signalEngine(){
             const ma100 =
                 prices.slice(-100).reduce((a,b)=>a+b,0)/100;
 
-            /* Institutional Hedge Filters */
-
             const priceRange =
                 Math.max(...prices.slice(-50)) -
                 Math.min(...prices.slice(-50));
@@ -194,17 +200,10 @@ async function signalEngine(){
 
             if(!(strongBull || strongBear)) continue;
 
-            let hedgeScore = 0;
-
-            if(strongBull) hedgeScore+=50;
-            if(strongBear) hedgeScore+=50;
-
             const momentum =
                 Math.abs(last-ma20)*1000;
 
             if(momentum < 1.2) continue;
-
-            if(hedgeScore < 98) continue;
 
             const direction =
                 strongBull ? "BUY 📈" : "SELL 📉";
@@ -225,7 +224,7 @@ async function signalEngine(){
                 market.pair.includes("JPY") ? 3 : 5;
 
             const message = glassMessage(
-                "ASH ELITE INSTITUTIONAL SIGNAL",
+                "ASH ELITE SIGNAL",
                 `
 Pair: ${market.pair}
 Direction: ${direction}
@@ -269,9 +268,27 @@ setInterval(async()=>{
 },5*60*1000);
 
 /* ============================
+WEBHOOK SERVER
+============================ */
+
+app.post(`/bot${process.env.TELEGRAM_BOT_TOKEN}`,
+(req,res)=>{
+    bot.processUpdate(req.body);
+    res.sendStatus(200);
+});
+
+if(process.env.RENDER_EXTERNAL_URL){
+
+    bot.setWebHook(
+        `${process.env.RENDER_EXTERNAL_URL}/bot${process.env.TELEGRAM_BOT_TOKEN}`
+    );
+
+}
+
+/* ============================
 SERVER START
 ============================ */
 
 app.listen(PORT,()=>{
-    console.log("🔥 Ash Elite Institutional Bot Running");
+    console.log("🔥 Ash Elite Bot Running");
 });
