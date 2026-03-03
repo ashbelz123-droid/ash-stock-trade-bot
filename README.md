@@ -1,2 +1,8 @@
-# ash-stock-trade-bot
-Fx signal bot
+# Ash Stock Trade Bot
+
+Community signal bot.
+
+Focus:
+- Quality signals
+- Low spam
+- Free community support
