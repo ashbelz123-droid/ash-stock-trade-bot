@@ -9,7 +9,6 @@ process.env.NTBA_FIX_350 = "1";
 
 /* ============================
 ASH ELITE BOT SERVER
-Owner: Ashbelz
 ============================ */
 
 const app = express();
@@ -17,16 +16,12 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 10000;
 
-/* ============================
-BOT CONFIG
-============================ */
-
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
 
 const CHANNEL = "@pipstockbot";
 
 /* ============================
-ROOT ROUTE (Fix Cannot GET /)
+ROOT ROUTE
 ============================ */
 
 app.get("/", (req,res)=>{
@@ -105,30 +100,6 @@ Ash Elite Engine
 }
 
 /* ============================
-START COMMAND
-============================ */
-
-bot.onText(/\/start/, async(msg)=>{
-
-    const text = `
-🔥 Ash Elite Community Bot
-
-Owner: Ashbelz
-
-Signals:
-Forex → 0-3/day
-Crypto → 0-2/day
-
-Channel:
-👉 https://t.me/pipstockbot
-
-Trade responsibly ❤️
-`;
-
-    await bot.sendMessage(msg.chat.id,text);
-});
-
-/* ============================
 SIGNAL ENGINE
 ============================ */
 
@@ -182,45 +153,31 @@ async function signalEngine(){
             const ma100 =
                 prices.slice(-100).reduce((a,b)=>a+b,0)/100;
 
-            const priceRange =
-                Math.max(...prices.slice(-50)) -
-                Math.min(...prices.slice(-50));
+            /* ===== ULTRA SNIPER FILTER ===== */
 
-            if(priceRange < 0.001) continue;
-/* ===== ULTRA SNIPER FILTER ===== */
+            const volatility = Math.abs(last - ma50);
+            if(volatility < 0.0008) continue;
 
-const volatility =
-Math.abs(last - ma50);
+            const structureConfirm =
+            (
+                (last > ma20 && ma20 > ma50 && ma50 > ma100) ||
+                (last < ma20 && ma20 < ma50 && ma50 < ma100)
+            );
 
-if(volatility < 0.0008) continue;
+            if(!structureConfirm) continue;
 
-const structureConfirm =
-(last > ma20 && ma20 > ma50 && ma50 > ma100) ||
-(last < ma20 && ma20 < ma50 && ma50 < ma100);
+            const momentum = Math.abs(last - ma20) * 1000;
+            if(momentum < 1.5) continue;
 
-if(!structureConfirm) continue;
+            let sniperScore = 0;
 
-const momentum =
-Math.abs(last - ma20) * 1000;
+            if(structureConfirm) sniperScore += 60;
+            if(momentum > 1.5) sniperScore += 40;
 
-if(momentum < 1.5) continue;
-
-let sniperScore = 0;
-
-if(structureConfirm) sniperScore += 60;
-if(momentum > 1.5) sniperScore += 40;
-
-if(sniperScore < 98) continue;
-
-            if(!(strongBull || strongBear)) continue;
-
-            const momentum =
-                Math.abs(last-ma20)*1000;
-
-            if(momentum < 1.2) continue;
+            if(sniperScore < 98) continue;
 
             const direction =
-                strongBull ? "BUY 📈" : "SELL 📉";
+                last > ma50 ? "BUY 📈" : "SELL 📉";
 
             const entry = last;
 
