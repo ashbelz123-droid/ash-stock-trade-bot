@@ -4,7 +4,6 @@ import axios from "axios";
 import dotenv from "dotenv";
 
 dotenv.config();
-
 process.env.NTBA_FIX_350 = "1";
 
 /* ============================
@@ -17,7 +16,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 10000;
 
 /* ============================
-ENV VARIABLES CHECK
+BOT INITIALIZATION
 ============================ */
 
 if(!process.env.TELEGRAM_BOT_TOKEN){
@@ -25,16 +24,14 @@ if(!process.env.TELEGRAM_BOT_TOKEN){
     process.exit(1);
 }
 
-const bot = new TelegramBot(
-    process.env.TELEGRAM_BOT_TOKEN
-);
+const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
 
 /* ============================
 ROOT ROUTE
 ============================ */
 
 app.get("/", (req,res)=>{
-    res.send("🔥 Ash Elite Bot Running");
+    res.send("🔥 Ash Elite Signal Bot Running");
 });
 
 /* ============================
@@ -45,10 +42,18 @@ bot.onText(/\/start/, async(msg)=>{
 
     try{
 
-        await bot.sendMessage(
-            msg.chat.id,
-            "🔥 Ash Elite Bot Active\n\nTrade responsibly ❤️"
-        );
+        const text = `
+🔥 Ash Elite Signal Bot
+
+Owner: Ashbelz
+
+📢 Join channel:
+👉 https://t.me/pipstockbot
+
+Trade responsibly ❤️
+`;
+
+        await bot.sendMessage(msg.chat.id,text);
 
     }catch(err){
         console.log(err.message);
@@ -85,6 +90,7 @@ ANTI SLEEP PING
 setInterval(async()=>{
 
     try{
+
         if(!process.env.RENDER_EXTERNAL_URL) return;
 
         await axios.get(process.env.RENDER_EXTERNAL_URL);
@@ -98,5 +104,5 @@ SERVER START
 ============================ */
 
 app.listen(PORT,()=>{
-    console.log("🔥 Ash Elite Bot Running");
+    console.log("🔥 Ash Elite Signal Bot Running");
 });
