@@ -187,16 +187,30 @@ async function signalEngine(){
                 Math.min(...prices.slice(-50));
 
             if(priceRange < 0.001) continue;
+/* ===== ULTRA SNIPER FILTER ===== */
 
-            const strongBull =
-                last > ma20 &&
-                ma20 > ma50 &&
-                ma50 > ma100;
+const volatility =
+Math.abs(last - ma50);
 
-            const strongBear =
-                last < ma20 &&
-                ma20 < ma50 &&
-                ma50 < ma100;
+if(volatility < 0.0008) continue;
+
+const structureConfirm =
+(last > ma20 && ma20 > ma50 && ma50 > ma100) ||
+(last < ma20 && ma20 < ma50 && ma50 < ma100);
+
+if(!structureConfirm) continue;
+
+const momentum =
+Math.abs(last - ma20) * 1000;
+
+if(momentum < 1.5) continue;
+
+let sniperScore = 0;
+
+if(structureConfirm) sniperScore += 60;
+if(momentum > 1.5) sniperScore += 40;
+
+if(sniperScore < 98) continue;
 
             if(!(strongBull || strongBear)) continue;
 
