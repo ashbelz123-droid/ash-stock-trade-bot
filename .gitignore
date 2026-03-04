@@ -1,2 +1,17 @@
-node_modules
+# Node modules folder
+node_modules/
+
+# Log files
+npm-debug.log
+yarn-error.log
+
+# Environment variables file
 .env
+
+# Build folders (if any)
+dist/
+build/
+
+# Operating system files
+.DS_Store
+Thumbs.db
